@@ -14,165 +14,93 @@
 
 ---
 
-# 📌 Node JWT API
+# 🔐 Node.js JWT Task API
 
-API de autenticação e gerenciamento de tarefas (TODOs) construída com **Node.js**, **Express**, **MongoDB** e **JWT**.
+![NodeJS](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
+![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
+
+> API RESTful focada em segurança e escalabilidade, fornecendo um sistema completo de autenticação e gestão de recursos protegidos.
+
+## 🏛️ Arquitetura do Projeto
+
+O projeto segue o padrão **MVC (Model-View-Controller)** adaptado para APIs, separando claramente as responsabilidades:
+
+* **`/src/routes`**: Definição dos *endpoints* e aplicação de *middlewares*.
+* **`/src/controllers`**: Lógica de orquestração entre a requisição e os dados. [Veja `auth.controller.js`](src/controllers/auth.controller.js)
+* **`/src/models`**: Esquemas de dados do Mongoose (User, Todo, RefreshToken).
+* **`/src/middlewares`**: Interceptadores para validação de JWT e tratamento de erros.
+
+## ✨ Funcionalidades Principais
+
+### 🔒 Autenticação & Segurança
+* **Autenticação Stateless:** Uso de **JSON Web Tokens (JWT)** para acesso seguro.
+* **Refresh Tokens:** Implementação de rotação de tokens para manter a sessão segura sem expor as credenciais do utilizador repetidamente.
+* **Hashing de Palavras-passe:** Encriptação utilizando `bcrypt` antes da persistência na base de dados.
+
+### 📝 Gestão de Dados
+* **CRUD Completo:** Operações de criação, leitura, atualização e remoção de tarefas (`Todos`).
+* **Relacionamentos:** As tarefas são estritamente vinculadas ao utilizador autenticado (um utilizador não vê as tarefas de outro).
+
+## 🚀 Como Executar
+
+### Pré-requisitos
+* Node.js (v18+)
+* MongoDB (Local ou Atlas)
+
+### Instalação
+
+1.  **Clone o repositório**
+    ```bash
+    git clone [https://github.com/BeiruthDEV/node-jwt-task-api.git](https://github.com/BeiruthDEV/node-jwt-task-api.git)
+    cd node-jwt-task-api
+    ```
+
+2.  **Configure as Variáveis de Ambiente**
+    Renomeie o arquivo `.env.example` para `.env` e preencha:
+    ```env
+    PORT=3000
+    MONGO_URI=mongodb://localhost:27017/task_db
+    JWT_SECRET=sua_chave_super_secreta
+    JWT_REFRESH_SECRET=sua_chave_de_refresh
+    ```
+
+3.  **Instale as Dependências**
+    ```bash
+    npm install
+    ```
+
+4.  **Inicie o Servidor**
+    ```bash
+    npm start
+    # Ou para desenvolvimento com hot-reload:
+    npm run dev
+    ```
+
+## 📡 Documentação da API (Endpoints)
+
+| Método | Rota | Descrição | Autenticação |
+| :--- | :--- | :--- | :---: |
+| **POST** | `/auth/signup` | Regista um novo utilizador | ❌ |
+| **POST** | `/auth/login` | Retorna Access e Refresh Tokens | ❌ |
+| **GET** | `/me` | Dados do perfil do utilizador logado | ✅ |
+| **GET** | `/todos` | Lista todas as tarefas do utilizador | ✅ |
+| **POST** | `/todos` | Cria uma nova tarefa | ✅ |
+| **PUT** | `/todos/:id` | Atualiza uma tarefa existente | ✅ |
+
+## 🛠️ Tecnologias e Bibliotecas
+
+* **Express:** Framework web rápido e minimalista.
+* **Mongoose:** ODM para modelagem de dados no MongoDB.
+* **Bcryptjs:** Para hashing seguro de senhas.
+* **Jsonwebtoken:** Criação e verificação de tokens.
+* **Cors/Helmet:** Middlewares de segurança HTTP.
 
 ---
 
-## 🚀 Tecnologias
-- Node.js
-- Express
-- MongoDB (Mongoose)
-- JWT (JSON Web Token)
-- Bcrypt (hash de senhas)
-- Joi/Zod (validação de dados)
-- Dotenv (variáveis de ambiente)
-
----
-
-## 📂 Estrutura do Projeto
-
-```bash
-src/
- ├── config/        # Configuração do banco (db.js)
- ├── controllers/   # Lógica das rotas
- ├── middlewares/   # Middlewares (auth, validate)
- ├── models/        # Modelos do Mongoose
- ├── routes/        # Definição das rotas
- ├── validators/    # Schemas de validação (Zod/Joi/Yup)
- ├── errors.js      # Tratamento de erros
- └── index.js       # Ponto de entrada do servidor
-```
-
----
-
-## ⚙️ Configuração
-
-Clone este repositório:
-
-```bash
-git clone https://github.com/seuusuario/node-jwt-api.git
-
-Instale as dependências:
-
-npm install
-```
-
-Crie um arquivo .env na raiz do projeto:
-
-```bash
-# Servidor
-PORT=3000
-
-# MongoDB
-MONGO_URI=mongodb://localhost:27017/node_jwt_api
-
-# JWT
-ACCESS_TOKEN_SECRET=sua-chave-secreta-aqui
-REFRESH_TOKEN_SECRET=outra-chave-secreta
-ACCESS_TOKEN_TTL=15m
-REFRESH_TOKEN_TTL=7d
-
-# Bcrypt
-BCRYPT_SALT_ROUNDS=10
-```
-
-
-Inicie o servidor:
-
-```bash
-npm run dev
-```
-
-
-O servidor estará rodando em:
-👉 http://localhost:3000
-
-
-🔑 Rotas da API
-1. Autenticação
-
-📌 Registrar usuário
-POST /auth/register
-
-Body (JSON):
-```bash
-{
-  "name": "João da Silva",
-  "email": "joao@example.com",
-  "password": "12345678"
-}
-```
-
-📌 Login
-POST /auth/login
-Body (JSON):
-```bash
-{
-  "email": "joao@example.com",
-  "password": "12345678"
-}
-```
-
-Resposta:
-```bash
-{
-  "accessToken": "jwt-token",
-  "refreshToken": "jwt-refresh-token"
-}
-```
-
-📌 Refresh Token
-POST /auth/refresh
-Body (JSON):
-```bash
-{
-  "refreshToken": "jwt-refresh-token"
-}
-```
-
-2. TODOs (protegidas por autenticação)
-
-Necessário enviar Authorization: Bearer <accessToken> no header.
-
-📌 Criar tarefa
-POST /todos
-```bash
-{
-  "title": "Estudar Node.js",
-  "description": "Praticar autenticação com JWT"
-}
-```
-
-📌 Listar tarefas
-GET /todos
-
-📌 Buscar tarefa por ID
-GET /todos/:id
-
-📌 Atualizar tarefa
-PUT /todos/:id
-```bash
-{
-{
-  "title": "Estudar MongoDB",
-  "description": "Revisar Mongoose"
-}
-```
-
-📌 Deletar tarefa
-DELETE /todos/:id
-
-🧪 Testando no Postman
-
-Registre um usuário em POST /auth/register.
-
-Faça login em POST /auth/login e copie o accessToken.
-
-Em qualquer rota de /todos, adicione no Header:
-
-Authorization: Bearer seuAccessTokenAqui
+### Autor
+**Matheus Beiruth**
 
 
 Teste todas as operações de CRUD.
