@@ -103,8 +103,3 @@ O projeto segue o padrão **MVC (Model-View-Controller)** adaptado para APIs, se
 **Matheus Beiruth**
 
 
-Teste todas as operações de CRUD.
-
-📜 Licença
-
-Este projeto é apenas para fins educacionais.
